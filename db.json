@@ -1,0 +1,91 @@
+{
+  "tournaments": [
+    {
+      "id": "1",
+      "name": "BGMI Pro Scrims #1",
+      "map": "Erangel",
+      "startTime": "2024-07-01T18:00:00Z",
+      "prizePool": 5000,
+      "entryFee": 100,
+      "maxTeams": 16,
+      "status": "upcoming",
+      "host": "admin1",
+      "roomId": "12345",
+      "roomPass": "bgmi2024"
+    },
+    {
+      "id": "2",
+      "name": "Menix Invitational Cup",
+      "image": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD...",
+      "map": "Miramar",
+      "startTime": "2024-07-10T20:00:00Z",
+      "endTime": "2024-07-10T22:00:00Z",
+      "prizePool": 10000,
+      "entryFee": 200,
+      "maxTeams": 25,
+      "registeredTeams": [],
+      "status": "upcoming",
+      "roomId": "MENIX2024",
+      "roomPassword": "cupchamp",
+      "host": "admin2"
+    }
+  ],
+  "users": [
+    {
+      "id": "1",
+      "username": "admin1",
+      "role": "admin",
+      "email": "admin1@example.com"
+    },
+    {
+      "id": "2",
+      "username": "player1",
+      "role": "user",
+      "email": "player1@example.com"
+    },
+    {
+      "id": "e816",
+      "identifier": "9782958994",
+      "password": "mohit7407",
+      "profile": {
+        "avatar": "",
+        "joined": "2024-06-30T00:00:00Z"
+      }
+    }
+  ],
+  "teams": [
+    {
+      "id": "1",
+      "tournamentId": 1,
+      "teamName": "Alpha Squad",
+      "players": [
+        {
+          "ign": "Alpha1",
+          "uid": "1001"
+        },
+        {
+          "ign": "Alpha2",
+          "uid": "1002"
+        },
+        {
+          "ign": "Alpha3",
+          "uid": "1003"
+        },
+        {
+          "ign": "Alpha4",
+          "uid": "1004"
+        }
+      ]
+    }
+  ],
+  "leaderboard": [
+    {
+      "tournamentId": 1,
+      "teamId": 1,
+      "kills": 10,
+      "rank": 1,
+      "points": 25,
+      "id": "56ea"
+    }
+  ]
+}
