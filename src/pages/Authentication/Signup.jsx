@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from "../../contexts/AuthContext";
 import { useNavigate } from 'react-router-dom';
 
 function generateOTP() {
@@ -28,11 +28,13 @@ const Signup = () => {
   // Live error for password mismatch
   const passwordMismatch = password && confirmPassword && password !== confirmPassword;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
-    if (!isEmail(identifier) && !isMobile(identifier)) {
+    let id = identifier;
+    if (isEmail(id)) id = id.toLowerCase();
+    if (!isEmail(id) && !isMobile(id)) {
       setError('Please enter a valid email or 10-digit mobile number.');
       return;
     }
@@ -44,45 +46,43 @@ const Signup = () => {
       setError('Passwords do not match.');
       return;
     }
-    // Generate OTP and go to step 2
+    setIdentifier(id); // update state to lowercased if email
+    // Generate OTP and send to backend
     const generatedOtp = generateOTP();
     setOtp(generatedOtp);
+    try {
+      await fetch('http://localhost:5000/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identifier: id, otp: generatedOtp })
+      });
+    } catch (err) {
+      setError('Failed to send OTP. Please try again.');
+      return;
+    }
     setStep(2);
   };
 
   const handleOtpSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    let id = identifier;
+    if (isEmail(id)) id = id.toLowerCase();
     if (enteredOtp !== otp) {
       setError('Invalid OTP. Please try again.');
       return;
     }
     setLoading(true);
-    // Save user to backend (users)
     try {
-      // Check if user already exists
-      const checkRes = await fetch('http://localhost:3001/users?identifier=' + encodeURIComponent(identifier));
-      const existing = await checkRes.json();
-      if (existing.length > 0) {
-        setError('User already exists. Please login.');
-        setLoading(false);
-        return;
-      }
-      // Save new user
-      const userData = {
-        identifier,
-        password, // In production, hash the password!
-        profile: { avatar: '', joined: new Date().toISOString() }
-      };
-      const res = await fetch('http://localhost:3001/users', {
+      const res = await fetch('http://localhost:3002/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData)
+        body: JSON.stringify({ identifier: id, password })
       });
-      if (!res.ok) throw new Error('Failed to save user');
-      const savedUser = await res.json();
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Failed to save user');
       setSuccess('Signup successful! Redirecting...');
-      login(savedUser);
+      login(data.user);
       setTimeout(() => navigate('/'), 1200);
     } catch (err) {
       setError('Signup failed. Please try again.');
@@ -110,28 +110,29 @@ const Signup = () => {
   };
 
   return (
-    <div className="page-container">
-      <h1 className="section-title">Signup</h1>
+    <div className="page-container" style={{ fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif" }}>
+      <h1 className="section-title" style={{ fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif", fontWeight: '900' }}>Signup</h1>
       <div className="card">
         {step === 1 && (
           <form onSubmit={handleSubmit}>
-            <label>Mobile Number or Email</label>
+            <label style={{ fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif", marginBottom: '8px', display: 'block' }}>Mobile Number or Email</label>
             <input
               type="text"
               value={identifier}
               onChange={e => setIdentifier(e.target.value)}
               placeholder="Enter mobile number or email"
               required
+              style={{ fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif", marginBottom: '16px' }}
             />
-            <label>New Password</label>
-            <div style={{ position: 'relative' }}>
+            <label style={{ fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif", marginBottom: '8px', display: 'block' }}>New Password</label>
+            <div style={{ position: 'relative', marginBottom: '16px' }}>
               <input
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 placeholder="Enter new password"
                 required
-                style={{ paddingRight: 40 }}
+                style={{ paddingRight: 40, fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif" }}
               />
               <button
                 type="button"
@@ -147,15 +148,15 @@ const Signup = () => {
                 )}
               </button>
             </div>
-            <label>Confirm Password</label>
-            <div style={{ position: 'relative' }}>
+            <label style={{ fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif", marginBottom: '8px', display: 'block' }}>Confirm Password</label>
+            <div style={{ position: 'relative', marginBottom: '16px' }}>
               <input
                 type={showConfirmPassword ? 'text' : 'password'}
                 value={confirmPassword}
                 onChange={e => setConfirmPassword(e.target.value)}
                 placeholder="Confirm password"
                 required
-                style={{ paddingRight: 40 }}
+                style={{ paddingRight: 40, fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif" }}
               />
               <button
                 type="button"
@@ -171,30 +172,30 @@ const Signup = () => {
                 )}
               </button>
             </div>
-            {passwordMismatch && <div className="text-center mb-2" style={{color:'#f87171'}}>Passwords do not match.</div>}
-            {error && <div className="text-center mb-2" style={{color:'#f87171'}}>{error}</div>}
-            <button type="submit" className="btn" style={{width:'100%'}} disabled={loading}>Sign Up</button>
+            {passwordMismatch && <div className="text-center mb-4" style={{color:'#f87171', fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif"}}>Passwords do not match.</div>}
+            {error && <div className="text-center mb-4" style={{color:'#f87171', fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif"}}>{error}</div>}
+            <button type="submit" className="btn" style={{width:'100%', fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif", marginBottom: '16px'}} disabled={loading}>Sign Up</button>
           </form>
         )}
         {step === 2 && (
           <form onSubmit={handleOtpSubmit}>
-            <div className="text-center mb-2">
-              <b>OTP sent to your {isEmail(identifier) ? 'email' : 'mobile'}:</b><br/>
-              <span style={{color:'#f87171',fontSize:'1.2em'}}>{otp}</span> {/* Simulate sending OTP */}
+            <div className="text-center mb-4" style={{ fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif" }}>
+              <b>OTP sent to your {isEmail(identifier) ? 'email' : 'WhatsApp/mobile'}.</b>
             </div>
-            <label>Enter OTP</label>
+            <label style={{ fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif", marginBottom: '8px', display: 'block' }}>Enter OTP</label>
             <input
               type="text"
               value={enteredOtp}
               onChange={e => setEnteredOtp(e.target.value)}
               placeholder="Enter 6-digit OTP"
               required
+              style={{ fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif", marginBottom: '16px' }}
             />
-            {error && <div className="text-center mb-2" style={{color:'#f87171'}}>{error}</div>}
-            <button type="submit" className="btn" style={{width:'100%'}} disabled={loading}>{loading ? 'Verifying...' : 'Verify OTP'}</button>
+            {error && <div className="text-center mb-4" style={{color:'#f87171', fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif"}}>{error}</div>}
+            <button type="submit" className="btn" style={{width:'100%', fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif", marginBottom: '16px'}} disabled={loading}>{loading ? 'Verifying...' : 'Verify OTP'}</button>
           </form>
         )}
-        {success && <div className="text-center mt-4" style={{color:'#22c55e',fontWeight:600}}>{success}</div>}
+        {success && <div className="text-center mt-6" style={{color:'#22c55e',fontWeight:600, fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif"}}>{success}</div>}
       </div>
     </div>
   );

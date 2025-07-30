@@ -17,7 +17,7 @@ const RegisterTeam = () => {
 
   return (
     <div className="page-container">
-      <h1 className="section-title">Register Team</h1>
+      <h1 className="section-title" style={{ fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif", fontWeight: '900' }}>Register Team</h1>
       <div className="card">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

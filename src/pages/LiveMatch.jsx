@@ -15,7 +15,7 @@ const liveMatch = {
 const LiveMatch = () => {
   return (
     <div className="page-container">
-      <h1 className="section-title">Live Match</h1>
+      <h1 className="section-title" style={{ fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif", fontWeight: '900' }}>Live Match</h1>
       <div className="card">
         <h2 className="text-lg font-bold mb-2">{liveMatch.name}</h2>
         <p>Room ID: {liveMatch.roomId}</p>

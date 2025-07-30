@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from "../../contexts/AuthContext";
 import { useNavigate, Link } from 'react-router-dom';
-import { authenticateUser } from './users';
+import { authenticateUser } from "../users";
 
 const Login = () => {
   const [identifier, setIdentifier] = useState('');
@@ -13,46 +13,56 @@ const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
-
-    // Use local authentication
-    const user = authenticateUser(identifier, password);
-
-    if (user) {
-      login(user);
+    let id = identifier;
+    if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(id)) id = id.toLowerCase();
+    try {
+      const res = await fetch('http://localhost:3002/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identifier: id, password })
+      });
+      const data = await res.json();
+      if (data.success) {
+        login(data.user);
       setLoading(false);
       navigate('/');
     } else {
-      setError('Invalid email/username or password.');
+        setError(data.error || 'Invalid email/phone or password.');
+        setLoading(false);
+      }
+    } catch (err) {
+      setError('Login failed. Please try again.');
       setLoading(false);
     }
   };
 
   return (
-    <div className="page-container">
-      <h1 className="section-title">Login</h1>
+    <div className="page-container" style={{ fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif" }}>
+      <h1 className="section-title" style={{ fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif", fontWeight: '900' }}>Login</h1>
       <div className="card">
         <form onSubmit={handleSubmit}>
-          <label>Mobile Number or Email</label>
+          <label style={{ fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif", marginBottom: '8px', display: 'block' }}>Mobile Number or Email</label>
           <input
             type="text"
             value={identifier}
             onChange={e => setIdentifier(e.target.value)}
             placeholder="Enter mobile number or email"
             required
+            style={{ fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif", marginBottom: '16px' }}
           />
-          <label>Password</label>
-          <div style={{ position: 'relative' }}>
+          <label style={{ fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif", marginBottom: '8px', display: 'block' }}>Password</label>
+          <div style={{ position: 'relative', marginBottom: '16px' }}>
             <input
               type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={e => setPassword(e.target.value)}
               placeholder="Enter password"
               required
-              style={{ paddingRight: 40 }}
+              style={{ paddingRight: 40, fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif" }}
             />
             <button
               type="button"
@@ -78,12 +88,12 @@ const Login = () => {
               )}
             </button>
           </div>
-          {error && <div className="text-center mb-2" style={{color:'#f87171'}}>{error}</div>}
-          <button type="submit" className="btn" style={{width:'100%'}} disabled={loading}>
+          {error && <div className="text-center mb-4" style={{color:'#f87171', fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif"}}>{error}</div>}
+          <button type="submit" className="btn" style={{width:'100%', fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif", marginBottom: '16px'}} disabled={loading}>
             {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
-        <div className="text-center mt-4">
+        <div className="text-center mt-6" style={{ fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif" }}>
           Don't have an account? <Link to="/signup" style={{color:'#f87171'}}>Sign up</Link>
         </div>
       </div>
