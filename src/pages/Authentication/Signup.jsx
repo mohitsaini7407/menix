@@ -47,17 +47,24 @@ const Signup = () => {
       return;
     }
     setIdentifier(id); // update state to lowercased if email
+    
     // Generate OTP and send to backend
     const generatedOtp = generateOTP();
     setOtp(generatedOtp);
     try {
-      await fetch('http://localhost:5000/send-otp', {
+      const response = await fetch('http://localhost:3002/send-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ identifier: id, otp: generatedOtp })
       });
+      const data = await response.json();
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to send OTP');
+      }
+      setSuccess(`OTP sent to ${id}. Please check and enter the OTP.`);
+      setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
-      setError('Failed to send OTP. Please try again.');
+      setError(err.message || 'Failed to send OTP. Please try again.');
       return;
     }
     setStep(2);
@@ -175,6 +182,26 @@ const Signup = () => {
             {passwordMismatch && <div className="text-center mb-4" style={{color:'#f87171', fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif"}}>Passwords do not match.</div>}
             {error && <div className="text-center mb-4" style={{color:'#f87171', fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif"}}>{error}</div>}
             <button type="submit" className="btn" style={{width:'100%', fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif", marginBottom: '16px'}} disabled={loading}>Sign Up</button>
+            
+            {/* Login link for existing users */}
+            <div className="text-center" style={{ fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif" }}>
+              <span style={{ color: '#6b7280' }}>Already have an account? </span>
+              <button 
+                type="button"
+                onClick={() => navigate('/login')}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#f87171',
+                  textDecoration: 'underline',
+                  cursor: 'pointer',
+                  fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif",
+                  fontWeight: '600'
+                }}
+              >
+                Login
+              </button>
+            </div>
           </form>
         )}
         {step === 2 && (

@@ -39,15 +39,23 @@ const TournamentDetail = () => {
   }, [user, id]);
 
   const handleRegister = async () => {
+    console.log('Register button clicked!');
+    console.log('User:', user);
+    console.log('Wallet:', wallet);
+    console.log('Tournament entry fee:', tournament.entryFee);
+    
     if (!user || !user.id) {
+      console.log('No user found, redirecting to login');
       navigate('/login');
       return;
     }
     if (wallet === null || wallet < tournament.entryFee) {
+      console.log('Insufficient balance');
       setNotification('Insufficient balance!');
       setTimeout(() => setNotification(''), 2000);
       return;
     }
+    console.log('Starting registration process...');
     setLoading(true);
     try {
       const res = await fetch('http://localhost:3002/register', {

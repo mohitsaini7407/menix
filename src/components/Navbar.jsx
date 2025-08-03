@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import logo from '../assets/logo.png';
 import walletLogo from '../assets/wallet.png';
@@ -19,8 +19,9 @@ const getProfileAvatar = (user) => {
 };
 
 const Navbar = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const [showNavbar, setShowNavbar] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(window.scrollY);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -49,6 +50,12 @@ const Navbar = () => {
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleLogout = () => {
+    logout();
+    toggleMenu();
+    navigate('/login', { replace: true });
   };
 
   // Now check if not home page, return null
@@ -197,11 +204,7 @@ const Navbar = () => {
                 
                 <button 
                   className="flex items-center gap-4 px-6 py-4 text-red-600 hover:bg-red-50 transition-colors w-full text-left"
-                  onClick={() => {
-                    // Add logout functionality here
-                    toggleMenu();
-                    // You can add logout logic here
-                  }}
+                  onClick={handleLogout}
                   style={{ fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif" }}
                 >
                   <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">

@@ -18,7 +18,7 @@ export const TournamentProvider = ({ children }) => {
   // Fetch tournaments from API
   const fetchTournaments = async () => {
     try {
-      const response = await fetch('http://localhost:3001/tournaments');
+      const response = await fetch('http://localhost:3002/tournaments');
       if (response.ok) {
         const data = await response.json();
         setTournaments(data);
@@ -33,7 +33,7 @@ export const TournamentProvider = ({ children }) => {
   // Create new tournament (admin only)
   const createTournament = async (tournamentData) => {
     try {
-      const response = await fetch('http://localhost:3001/tournaments', {
+      const response = await fetch('http://localhost:3002/tournaments', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -57,7 +57,7 @@ export const TournamentProvider = ({ children }) => {
   // Register team for tournament
   const registerTeam = async (tournamentId, teamData) => {
     try {
-      const response = await fetch(`http://localhost:3001/tournaments/${tournamentId}/register`, {
+      const response = await fetch(`http://localhost:3002/tournaments/${tournamentId}/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

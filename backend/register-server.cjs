@@ -10,6 +10,7 @@ const DATA_DIR = __dirname;
 const regFile = path.join(DATA_DIR, 'registeredlive.json');
 const tournamentsFile = path.join(DATA_DIR, 'tournaments.json');
 const usersFile = path.join(DATA_DIR, 'users.json');
+const otpFile = path.join(DATA_DIR, 'otp.json');
 
 function readJson(file) {
   if (!fs.existsSync(file)) return [];
@@ -106,6 +107,61 @@ app.get('/tournaments', (req, res) => {
 // GET /users
 app.get('/users', (req, res) => {
   res.json(readJson(usersFile));
+});
+
+// POST /send-otp
+app.post('/send-otp', (req, res) => {
+  const { identifier, otp } = req.body;
+  if (!identifier || !otp) {
+    return res.status(400).json({ error: 'Identifier and OTP required' });
+  }
+  
+  // Store OTP with timestamp (expires in 5 minutes)
+  const otps = readJson(otpFile);
+  const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes from now
+  
+  // Remove any existing OTP for this identifier
+  const filteredOtps = otps.filter(o => o.identifier !== identifier);
+  
+  // Add new OTP
+  filteredOtps.push({ identifier, otp, expiresAt: expiresAt.toISOString() });
+  
+  writeJson(otpFile, filteredOtps);
+  
+  // In a real app, you would send SMS/email here
+  console.log(`OTP for ${identifier}: ${otp}`);
+  
+  res.json({ success: true, message: 'OTP sent successfully' });
+});
+
+// POST /verify-otp
+app.post('/verify-otp', (req, res) => {
+  const { identifier, otp } = req.body;
+  if (!identifier || !otp) {
+    return res.status(400).json({ error: 'Identifier and OTP required' });
+  }
+  
+  const otps = readJson(otpFile);
+  const now = new Date();
+  
+  // Find valid OTP
+  const validOtp = otps.find(o => 
+    o.identifier === identifier && 
+    o.otp === otp && 
+    new Date(o.expiresAt) > now
+  );
+  
+  if (!validOtp) {
+    return res.status(400).json({ error: 'Invalid or expired OTP' });
+  }
+  
+  // Remove used OTP
+  const remainingOtps = otps.filter(o => 
+    !(o.identifier === identifier && o.otp === otp)
+  );
+  writeJson(otpFile, remainingOtps);
+  
+  res.json({ success: true, message: 'OTP verified successfully' });
 });
 
 const PORT = 3002;
