@@ -19,22 +19,51 @@ const Login = () => {
     setLoading(true);
     let id = identifier;
     if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(id)) id = id.toLowerCase();
+    
     try {
+      // Try production backend first
       const res = await fetch('https://menix-backtest.vercel.app/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ identifier: id, password })
       });
-      const data = await res.json();
-      if (data.success) {
-        login(data.user);
-        setLoading(false);
-        navigate('/');
-      } else {
-        setError(data.error || 'Invalid email/phone or password.');
-        setLoading(false);
+      
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          login(data.user);
+          setLoading(false);
+          navigate('/');
+          return;
+        } else {
+          setError(data.error || 'Invalid email/phone or password.');
+          setLoading(false);
+          return;
+        }
       }
+      
+      // If production backend fails, try MongoDB Atlas
+      const mongoRes = await fetch('https://menix-backtest.vercel.app/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: id, password })
+      });
+      
+      if (mongoRes.ok) {
+        const mongoData = await mongoRes.json();
+        if (mongoData.success) {
+          login(mongoData.user);
+          setLoading(false);
+          navigate('/');
+          return;
+        }
+      }
+      
+      setError('Invalid email/phone or password.');
+      setLoading(false);
+      
     } catch (err) {
+      console.error('Login error:', err);
       setError('Login failed. Please try again.');
       setLoading(false);
     }

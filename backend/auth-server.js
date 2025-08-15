@@ -1,7 +1,11 @@
-const express = require('express');
-const cors = require('cors');
-const fs = require('fs');
-const path = require('path');
+import express from 'express';
+import cors from 'cors';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = 3002;
@@ -137,6 +141,76 @@ app.post('/register', (req, res) => {
       success: false,
       error: 'Failed to register user'
     });
+  }
+});
+
+// Tournaments endpoint
+app.get('/tournaments', (req, res) => {
+  try {
+    const tournamentsPath = path.join(__dirname, 'tournaments.json');
+    const tournamentsData = fs.readFileSync(tournamentsPath, 'utf8');
+    const tournaments = JSON.parse(tournamentsData);
+    res.json(tournaments);
+  } catch (error) {
+    console.error('Error reading tournaments.json:', error);
+    res.status(500).json({ error: 'Failed to fetch tournaments' });
+  }
+});
+
+// Create tournament endpoint
+app.post('/tournaments', (req, res) => {
+  try {
+    const tournamentsPath = path.join(__dirname, 'tournaments.json');
+    const tournamentsData = fs.readFileSync(tournamentsPath, 'utf8');
+    const tournaments = JSON.parse(tournamentsData);
+    
+    const newTournament = {
+      id: Math.max(...tournaments.map(t => t.id), 0) + 1,
+      ...req.body,
+      createdAt: new Date().toISOString()
+    };
+    
+    tournaments.push(newTournament);
+    fs.writeFileSync(tournamentsPath, JSON.stringify(tournaments, null, 2));
+    
+    res.json(newTournament);
+  } catch (error) {
+    console.error('Error creating tournament:', error);
+    res.status(500).json({ error: 'Failed to create tournament' });
+  }
+});
+
+// Register team for tournament endpoint
+app.post('/tournaments/:id/register', (req, res) => {
+  try {
+    const tournamentsPath = path.join(__dirname, 'tournaments.json');
+    const tournamentsData = fs.readFileSync(tournamentsPath, 'utf8');
+    const tournaments = JSON.parse(tournamentsData);
+    
+    const tournamentId = parseInt(req.params.id);
+    const tournament = tournaments.find(t => t.id === tournamentId);
+    
+    if (!tournament) {
+      return res.status(404).json({ error: 'Tournament not found' });
+    }
+    
+    if (!tournament.registeredTeams) {
+      tournament.registeredTeams = [];
+    }
+    
+    const newTeam = {
+      id: Math.max(...tournament.registeredTeams.map(team => team.id), 0) + 1,
+      ...req.body,
+      registeredAt: new Date().toISOString()
+    };
+    
+    tournament.registeredTeams.push(newTeam);
+    fs.writeFileSync(tournamentsPath, JSON.stringify(tournaments, null, 2));
+    
+    res.json({ success: true, team: newTeam });
+  } catch (error) {
+    console.error('Error registering team:', error);
+    res.status(500).json({ error: 'Failed to register team' });
   }
 });
 

@@ -9,7 +9,9 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "auth-server": "node auth-server.js",
-    "start-all": "concurrently \"npm run auth-server\" \"npm run dev\""
+    "start-all": "concurrently \"npm run auth-server\" \"npm run dev\"",
+    "deploy-backend": "cd backend && vercel --prod",
+    "deploy-frontend": "vercel --prod"
   },
   "dependencies": {
     "@capacitor/android": "^7.4.0",

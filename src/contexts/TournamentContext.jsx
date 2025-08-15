@@ -15,10 +15,13 @@ export const TournamentProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [liveMatches, setLiveMatches] = useState([]);
 
+  // Production backend URL
+  const API_BASE_URL = 'https://menix-backtest.vercel.app';
+
   // Fetch tournaments from API
   const fetchTournaments = async () => {
     try {
-      const response = await fetch('http://localhost:3002/tournaments');
+      const response = await fetch(`${API_BASE_URL}/tournaments`);
       if (response.ok) {
         const data = await response.json();
         setTournaments(data);
@@ -33,7 +36,7 @@ export const TournamentProvider = ({ children }) => {
   // Create new tournament (admin only)
   const createTournament = async (tournamentData) => {
     try {
-      const response = await fetch('http://localhost:3002/tournaments', {
+      const response = await fetch(`${API_BASE_URL}/tournaments`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -57,7 +60,7 @@ export const TournamentProvider = ({ children }) => {
   // Register team for tournament
   const registerTeam = async (tournamentId, teamData) => {
     try {
-      const response = await fetch(`http://localhost:3002/tournaments/${tournamentId}/register`, {
+      const response = await fetch(`${API_BASE_URL}/tournaments/${tournamentId}/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
