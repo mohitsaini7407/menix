@@ -16,7 +16,11 @@ app.use(express.json());
 mongoose.connect(
   'mongodb+srv://mohitsaini7407:mohit7407@menix.804cf5m.mongodb.net/menix?retryWrites=true&w=majority',
   { useNewUrlParser: true, useUnifiedTopology: true }
-);
+).then(() => {
+  console.log('Connected to MongoDB Atlas');
+}).catch((error) => {
+  console.log('MongoDB Atlas connection failed, using JSON file endpoints only:', error.message);
+});
 
 const userSchema = new mongoose.Schema({
   username: String,
@@ -53,6 +57,14 @@ const writeJsonFile = (filename, data) => {
 // MongoDB Atlas login endpoint
 app.post('/api/login', async (req, res) => {
   try {
+    // Check if MongoDB is connected
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({ 
+        success: false, 
+        message: 'MongoDB not available, please try JSON file login endpoint' 
+      });
+    }
+    
     const { username, password } = req.body;
     const user = await User.findOne({ username, password });
     if (user) {

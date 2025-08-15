@@ -36,7 +36,28 @@ const Login = () => {
     if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(id)) id = id.toLowerCase();
     
     try {
-      // Try production backend first
+      // Try local backend first for testing
+      const localRes = await fetch('http://localhost:5000/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identifier: id, password })
+      });
+      
+      if (localRes.ok) {
+        const data = await localRes.json();
+        if (data.success) {
+          login(data.user);
+          setLoading(false);
+          navigate('/');
+          return;
+        } else {
+          setError(data.error || 'Invalid email/phone or password.');
+          setLoading(false);
+          return;
+        }
+      }
+      
+      // If local backend fails, try production backend
       const res = await fetch('https://menix-backtest.vercel.app/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
