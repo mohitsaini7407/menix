@@ -172,8 +172,8 @@ export const TournamentProvider = ({ children }) => {
   }, [tournaments]);
 
   const value = {
-    tournaments,
-    liveMatches,
+    tournaments: Array.isArray(tournaments) ? tournaments : [],
+    liveMatches: Array.isArray(liveMatches) ? liveMatches : [],
     loading,
     createTournament,
     registerTeam,
