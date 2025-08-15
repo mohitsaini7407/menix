@@ -36,7 +36,7 @@ const Login = () => {
     if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(id)) id = id.toLowerCase();
     
     try {
-      // Try local backend first for testing
+      // Try local backend first (working)
       const localRes = await fetch('http://localhost:5000/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
