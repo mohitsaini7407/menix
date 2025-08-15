@@ -17,28 +17,48 @@ const FILTERS = [
 
 const Tournaments = () => {
   const [selectedFilter, setSelectedFilter] = useState(null);
-  const tournaments = tournamentDetails;
+  const [tournaments, setTournaments] = useState([]);
   const navigate = useNavigate();
   const { user } = useAuth();
   const [registeredTournaments, setRegisteredTournaments] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) {
       navigate('/login');
       return;
     }
+    
+    // Initialize tournaments data
+    if (tournamentDetails && Array.isArray(tournamentDetails)) {
+      setTournaments(tournamentDetails);
+    } else {
+      setTournaments([]);
+    }
+    
     if (user && user.id) {
       fetch(`http://localhost:3002/registrations?userId=${user.id}`)
         .then(res => res.json())
         .then(data => setRegisteredTournaments(data.map(r => r.tournamentId)))
-        .catch(() => setRegisteredTournaments([]));
+        .catch(() => setRegisteredTournaments([]))
+        .finally(() => setLoading(false));
+    } else {
+      setLoading(false);
     }
   }, [user, navigate]);
 
   const handleRegisterClick = (tournament) => {
       navigate(`/tournament/${tournament.id}`);
   };
+
+  // Don't render until we have tournaments data
+  if (loading || !Array.isArray(tournaments)) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+        <div className="text-white text-xl">Loading tournaments...</div>
+      </div>
+    );
+  }
 
   return (
     <>

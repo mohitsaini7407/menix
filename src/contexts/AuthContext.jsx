@@ -4,11 +4,21 @@ const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Load user from localStorage on mount
-    const stored = localStorage.getItem('menix_user');
-    if (stored) setUser(JSON.parse(stored));
+    try {
+      const stored = localStorage.getItem('menix_user');
+      if (stored) {
+        const userData = JSON.parse(stored);
+        setUser(userData);
+      }
+    } catch (error) {
+      console.error('Error loading user from localStorage:', error);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   const login = (userData) => {
@@ -21,8 +31,17 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('menix_user');
   };
 
+  // Don't render children until authentication state is loaded
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
+
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

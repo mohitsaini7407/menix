@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from "../../contexts/AuthContext";
 import { useNavigate, Link } from 'react-router-dom';
 import { authenticateUser } from "../users";
@@ -9,9 +9,24 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isReady, setIsReady] = useState(false);
 
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  // Ensure component is ready to render
+  useEffect(() => {
+    setIsReady(true);
+  }, []);
+
+  // Don't render until component is ready
+  if (!isReady) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();

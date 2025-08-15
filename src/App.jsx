@@ -107,6 +107,21 @@ function AppWithBackButton() {
     );
   }
 
+  // If user is not authenticated and we're on login/signup, show those pages
+  if (!user && ['/login', '/signup'].includes(location.pathname)) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900" style={{ fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif" }}>
+        <main className="container mx-auto px-4 py-8" style={{marginLeft: 1, marginRight: 1}}>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="*" element={<Login />} />
+          </Routes>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900" style={{ fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif" }}>
       <Navbar />
