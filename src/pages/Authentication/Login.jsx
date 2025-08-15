@@ -13,32 +13,32 @@ const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError('');
-  setLoading(true);
-  let id = identifier;
-  if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(id)) id = id.toLowerCase();
-  try {
-    const res = await fetch('https://menix-backend.vercel.app/login', { // <-- update here
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ identifier: id, password })
-    });
-    const data = await res.json();
-    if (data.success) {
-      login(data.user);
-      setLoading(false);
-      navigate('/');
-    } else {
-      setError(data.error || 'Invalid email/phone or password.');
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    let id = identifier;
+    if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(id)) id = id.toLowerCase();
+    try {
+      const res = await fetch('https://menix-backtest.vercel.app/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identifier: id, password })
+      });
+      const data = await res.json();
+      if (data.success) {
+        login(data.user);
+        setLoading(false);
+        navigate('/');
+      } else {
+        setError(data.error || 'Invalid email/phone or password.');
+        setLoading(false);
+      }
+    } catch (err) {
+      setError('Login failed. Please try again.');
       setLoading(false);
     }
-  } catch (err) {
-    setError('Login failed. Please try again.');
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <div className="page-container" style={{ fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif" }}>
@@ -101,4 +101,4 @@ const handleSubmit = async (e) => {
   );
 };
 
-export default Login; 
+export default Login;
