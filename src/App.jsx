@@ -23,7 +23,16 @@ import { App as CapApp } from '@capacitor/app';
 function AppWithBackButton() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+
+  // Show loading state while auth is being determined
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
 
   // Redirect to login if not authenticated (except for login and signup pages)
   useEffect(() => {
@@ -126,36 +135,38 @@ function AppWithBackButton() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900" style={{ fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif" }}>
       <Navbar />
       <main className="container mx-auto px-4 py-8" style={{marginLeft: 1, marginRight: 1}}>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/tournaments" element={<Tournaments />} />
-          <Route path="/tournament/:id" element={<TournamentDetail />} />
-          <Route path="/tournament/:id/register" element={<RegisterTeam />} />
-          <Route path="/tournament/:id/live" element={<LiveMatch />} />
-          <Route path="/leaderboard" element={<Leaderboard />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route 
-            path="/admin/create" 
-            element={
-              <ProtectedRoute adminOnly>
-                <CreateTournament />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/profile" 
-            element={
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            } 
-          />
-          <Route path="/profile-details" element={<ProfileDetails />} />
-          <Route path="/wallet" element={<Wallet />} />
-          <Route path="/pay" element={<Pay />} />
-          <Route path="*" element={<div className="text-center text-white text-2xl mt-20" style={{ fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif" }}>404 - Page Not Found</div>} />
-        </Routes>
+        <TournamentProvider>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/tournaments" element={<Tournaments />} />
+            <Route path="/tournament/:id" element={<TournamentDetail />} />
+            <Route path="/tournament/:id/register" element={<RegisterTeam />} />
+            <Route path="/tournament/:id/live" element={<LiveMatch />} />
+            <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route 
+              path="/admin/create" 
+              element={
+                <ProtectedRoute adminOnly>
+                  <CreateTournament />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/profile" 
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              } 
+            />
+            <Route path="/profile-details" element={<ProfileDetails />} />
+            <Route path="/wallet" element={<Wallet />} />
+            <Route path="/pay" element={<Pay />} />
+            <Route path="*" element={<div className="text-center text-white text-2xl mt-20" style={{ fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif" }}>404 - Page Not Found</div>} />
+          </Routes>
+        </TournamentProvider>
       </main>
     </div>
   );
@@ -164,11 +175,9 @@ function AppWithBackButton() {
 function App() {
   return (
     <AuthProvider>
-      <TournamentProvider>
-        <Router>
-          <AppWithBackButton />
-        </Router>
-      </TournamentProvider>
+      <Router>
+        <AppWithBackButton />
+      </Router>
     </AuthProvider>
   );
 }

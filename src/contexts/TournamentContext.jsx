@@ -24,10 +24,18 @@ export const TournamentProvider = ({ children }) => {
       const response = await fetch(`${API_BASE_URL}/tournaments`);
       if (response.ok) {
         const data = await response.json();
-        setTournaments(data);
+        if (Array.isArray(data)) {
+          setTournaments(data);
+        } else {
+          console.error('Tournaments data is not an array:', data);
+          setTournaments([]);
+        }
+      } else {
+        setTournaments([]);
       }
     } catch (error) {
       console.error('Error fetching tournaments:', error);
+      setTournaments([]);
     } finally {
       setLoading(false);
     }
@@ -46,7 +54,10 @@ export const TournamentProvider = ({ children }) => {
 
       if (response.ok) {
         const newTournament = await response.json();
-        setTournaments(prev => [...prev, newTournament]);
+        setTournaments(prev => {
+          if (!Array.isArray(prev)) return [newTournament];
+          return [...prev, newTournament];
+        });
         return { success: true, tournament: newTournament };
       } else {
         throw new Error('Failed to create tournament');
@@ -71,13 +82,15 @@ export const TournamentProvider = ({ children }) => {
       if (response.ok) {
         const result = await response.json();
         // Update tournament with new registration
-        setTournaments(prev => 
-          prev.map(t => 
+        setTournaments(prev => {
+          if (!Array.isArray(prev)) return prev;
+          
+          return prev.map(t => 
             t.id === tournamentId 
               ? { ...t, registeredTeams: [...(t.registeredTeams || []), result.team] }
               : t
-          )
-        );
+          );
+        });
         return { success: true, registration: result };
       } else {
         throw new Error('Registration failed');
@@ -90,14 +103,19 @@ export const TournamentProvider = ({ children }) => {
 
   // Get tournament by ID
   const getTournament = (id) => {
+    if (!Array.isArray(tournaments)) return null;
     return tournaments.find(t => t.id === parseInt(id));
   };
 
   // Update tournament status based on time
   const updateTournamentStatus = () => {
+    if (!Array.isArray(tournaments)) return;
+    
     const now = new Date();
-    setTournaments(prev => 
-      prev.map(tournament => {
+    setTournaments(prev => {
+      if (!Array.isArray(prev)) return prev;
+      
+      return prev.map(tournament => {
         const startTime = new Date(tournament.startTime);
         const endTime = new Date(tournament.endTime);
         
@@ -111,12 +129,13 @@ export const TournamentProvider = ({ children }) => {
         }
         
         return { ...tournament, status };
-      })
-    );
+      });
+    });
   };
 
   // Get tournaments by status
   const getTournamentsByStatus = (status) => {
+    if (!Array.isArray(tournaments)) return [];
     return tournaments.filter(t => t.status === status);
   };
 
@@ -146,8 +165,10 @@ export const TournamentProvider = ({ children }) => {
 
   // Update live matches
   useEffect(() => {
-    const ongoing = getOngoingTournaments();
-    setLiveMatches(ongoing);
+    if (Array.isArray(tournaments)) {
+      const ongoing = getOngoingTournaments();
+      setLiveMatches(ongoing);
+    }
   }, [tournaments]);
 
   const value = {
