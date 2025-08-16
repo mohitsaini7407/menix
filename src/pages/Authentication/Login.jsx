@@ -58,7 +58,7 @@ const Login = () => {
       }
       
       // If local backend fails, try production backend
-      const res = await fetch('https://menix-backtest.vercel.app/login', {
+      const res = await fetch('https://menix_backend.vercel.app/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ identifier: id, password })
