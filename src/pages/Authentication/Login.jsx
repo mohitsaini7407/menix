@@ -37,7 +37,7 @@ const Login = () => {
     
     try {
       // If local backend fails, try production backend
-      const res = await fetch('https://menix_backend.vercel.app/', {
+      const res = await fetch('https://menix_backend.vercel.app', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ identifier: id, password })
@@ -58,7 +58,7 @@ const Login = () => {
       }
       
       // If production backend fails, try MongoDB Atlas
-      const mongoRes = await fetch('https://menix-backtest.vercel.app/api/login', {
+      const mongoRes = await fetch('https://menix_backend.vercel.app/api/login.js', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: id, password })
