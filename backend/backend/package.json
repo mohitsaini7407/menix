@@ -1,9 +1,16 @@
 {
-  "name": "menix_backend",
-  "version": "1.0.0",
-  "main": "index.js",
-  "dependencies": {
-    "mongoose": "^7.6.3"
+ "version": 2,
+ "builds": [
+  {
+   "src": "index.js",
+   "use": "@vercel/node",
+   "config": { "includeFiles": ["dist/**"] }
   }
+ ],
+ "routes": [
+  {
+   "src": "/(.*)",
+   "dest": "index.js"
+  }
+ ]
 }
-
