@@ -24,24 +24,18 @@ module.exports = async (req, res) => {
   try {
     await connectDB();
 
-    // Fetch username & password from MongoDB
-    const users = await User.find({}, "username password");
+    // Fetch all users with email and password
+    const users = await User.find({}, "email password");
 
-    // Send HTML with script that logs data to browser console
+    // Build HTML to show on page
+    let html = "<h2>Users from MongoDB:</h2><ul>";
+    users.forEach((u) => {
+      html += `<li><strong>Email:</strong> ${u.email} | <strong>Password:</strong> ${u.password}</li>`;
+    });
+    html += "</ul>";
+
     res.setHeader("Content-Type", "text/html");
-    res.end(`
-      <!DOCTYPE html>
-      <html>
-        <head><title>MongoDB Data</title></head>
-        <body>
-          <h2>Open browser console (F12)</h2>
-          <script>
-            const users = ${JSON.stringify(users)};
-            console.log("Users from MongoDB:", users);
-          </script>
-        </body>
-      </html>
-    `);
+    res.end(html);
   } catch (err) {
     res.status(500).send("Error: " + err.message);
   }
