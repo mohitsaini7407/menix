@@ -1,27 +1,27 @@
 #!/bin/bash
 
-echo "🚀 Deploying Menix BGMI Tournament App to Vercel..."
+echo "🚀 Starting Menix Tournament App Deployment..."
 
-echo "📦 Installing dependencies..."
-npm install
+# Check if Vercel CLI is installed
+if ! command -v vercel &> /dev/null; then
+    echo "❌ Vercel CLI not found. Installing..."
+    npm install -g vercel
+fi
 
-echo "🔧 Building frontend..."
-npm run build
-
-echo "🌐 Deploying backend to Vercel..."
+# Deploy Backend
+echo "📦 Deploying Backend..."
 cd backend
 vercel --prod --yes
-
-echo "🎨 Deploying frontend to Vercel..."
 cd ..
+
+# Deploy Frontend
+echo "🌐 Deploying Frontend..."
 vercel --prod --yes
 
-echo "✅ Deployment complete!"
+echo "✅ Deployment completed!"
+echo "Frontend: https://menix.vercel.app"
+echo "Backend: https://menix-backend.vercel.app"
 echo ""
-echo "🔗 Backend URL: https://menix-backtest.vercel.app"
-echo "🔗 Frontend URL: https://menix.vercel.app"
-echo ""
-echo "📝 Don't forget to:"
-echo "   1. Set MONGODB_URI environment variable in Vercel"
-echo "   2. Update frontend API URLs if needed"
-echo "   3. Test the login functionality" 
+echo "⚠️  Don't forget to set environment variables in Vercel dashboard!"
+echo "Backend: MONGO_URI, FRONTEND_URL"
+echo "Frontend: VITE_API_URL" 

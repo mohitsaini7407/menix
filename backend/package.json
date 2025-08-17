@@ -2,8 +2,23 @@
   "name": "menix_backend",
   "version": "1.0.0",
   "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "build": "echo 'No build step required'"
+  },
   "dependencies": {
-    "mongoose": "^7.6.3"
+    "express": "^5.1.0",
+    "mongoose": "^8.17.1",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.1",
+    "helmet": "^8.0.0",
+    "morgan": "^1.10.0",
+    "compression": "^1.7.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0"
   }
 }
 

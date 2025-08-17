@@ -8,10 +8,9 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "auth-server": "node auth-server.js",
-    "start-all": "concurrently \"npm run auth-server\" \"npm run dev\"",
     "deploy-backend": "cd backend && vercel --prod",
-    "deploy-frontend": "vercel --prod"
+    "deploy-frontend": "vercel --prod",
+    "deploy-all": "npm run deploy-backend && npm run deploy-frontend"
   },
   "dependencies": {
     "@capacitor/android": "^7.4.0",
@@ -19,17 +18,9 @@
     "@capacitor/cli": "^7.4.0",
     "@capacitor/core": "^7.4.0",
     "@tailwindcss/forms": "^0.5.10",
-    "concurrently": "^8.2.2",
-    "cors": "^2.8.5",
-    "dotenv": "^17.2.1",
-    "express": "^5.1.0",
-    "json-server": "^1.0.0-beta.3",
-    "mongoose": "^8.17.1",
-    "nodemailer": "^7.0.4",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "react-router-dom": "^7.6.3",
-    "twilio": "^5.7.1"
+    "react-router-dom": "^7.6.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.29.0",

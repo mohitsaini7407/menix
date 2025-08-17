@@ -30,29 +30,23 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
     setLoading(true);
+    setError('');
+    
     let id = identifier;
     if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(id)) id = id.toLowerCase();
-    
+
     try {
-      // If local backend fails, try production backend
-      const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000";
+      const API_BASE = import.meta.env.VITE_API_URL || "https://menix-backend.vercel.app";
       
-      const res = await fetch(`${API_BASE}/api/login`, {
+      const response = await fetch(`${API_BASE}/api/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ identifier: id, password }),
       });
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ identifier: id, password })
-      });
-
       
-      if (res.ok) {
-        const data = await res.json();
+      if (response.ok) {
+        const data = await response.json();
         if (data.success) {
           login(data.user);
           setLoading(false);
@@ -66,15 +60,15 @@ const Login = () => {
       }
       
       // If production backend fails, try MongoDB Atlas
-      const mongoRes = await fetch('https://menix-backend.vercel.app/api/login', {
+      const mongoResponse = await fetch('https://menix-backend.vercel.app/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ identifier: id, password })
       });
 
       
-      if (mongoRes.ok) {
-        const mongoData = await mongoRes.json();
+      if (mongoResponse.ok) {
+        const mongoData = await mongoResponse.json();
         if (mongoData.success) {
           login(mongoData.user);
           setLoading(false);
