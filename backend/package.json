@@ -4,8 +4,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js",
+    "start": "node index.cjs",
+    "dev": "nodemon index.cjs",
     "build": "echo 'No build step required'"
   },
   "dependencies": {
