@@ -53,7 +53,7 @@ app.get('/', (req, res) => {
   res.json({ message: 'Menix Backend API is running!' });
 });
 
-app.get('/api/health', (req, res) => {
+app.get('/api/index', (req, res) => {
   res.json({ 
     status: 'OK', 
     timestamp: new Date().toISOString(),
