@@ -39,7 +39,7 @@ const Login = () => {
     try {
       const API_BASE = import.meta.env.VITE_API_URL || "https://menix-backend.vercel.app";
       
-      const response = await fetch(`${API_BASE}/api/login`, {
+      const response = await fetch(`${API_BASE}/api/index`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ identifier: id, password }),
@@ -60,7 +60,7 @@ const Login = () => {
       }
       
       // If production backend fails, try MongoDB Atlas
-      const mongoResponse = await fetch('https://menix-backend.vercel.app/api/login', {
+      const mongoResponse = await fetch('https://menix-backend.vercel.app/api/index', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ identifier: id, password })
