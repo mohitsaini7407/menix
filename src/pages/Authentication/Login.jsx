@@ -48,7 +48,13 @@ const Login = () => {
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
-          login(data.user);
+          // Normalize backend response to a user object for storage
+          const normalizedUser = data.user || {
+            id: data.userId,
+            username: id.includes('@') ? id.split('@')[0] : id,
+            email: id.includes('@') ? id : undefined,
+          };
+          login(normalizedUser);
           setLoading(false);
           navigate('/');
           return;
@@ -70,7 +76,12 @@ const Login = () => {
       if (mongoResponse.ok) {
         const mongoData = await mongoResponse.json();
         if (mongoData.success) {
-          login(mongoData.user);
+          const normalizedUser = mongoData.user || {
+            id: mongoData.userId,
+            username: id.includes('@') ? id.split('@')[0] : id,
+            email: id.includes('@') ? id : undefined,
+          };
+          login(normalizedUser);
           setLoading(false);
           navigate('/');
           return;

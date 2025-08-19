@@ -10,9 +10,12 @@ export function AuthProvider({ children }) {
     // Load user from localStorage on mount
     try {
       const stored = localStorage.getItem('menix_user');
-      if (stored) {
+      if (stored && stored !== 'undefined' && stored !== 'null' && stored.trim() !== '') {
         const userData = JSON.parse(stored);
         setUser(userData);
+      } else if (stored) {
+        // Clean up invalid legacy values like the string "undefined"
+        localStorage.removeItem('menix_user');
       }
     } catch (error) {
       console.error('Error loading user from localStorage:', error);
@@ -22,7 +25,11 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = (userData) => {
-      setUser(userData);
+    if (!userData || typeof userData !== 'object') {
+      console.warn('Attempted to login with invalid user data:', userData);
+      return;
+    }
+    setUser(userData);
     localStorage.setItem('menix_user', JSON.stringify(userData));
   };
 
