@@ -22,6 +22,26 @@ const User = mongoose.models.User || mongoose.model('User', userSchema);
 
 // Vercel serverless function style handler
 module.exports = async (req, res) => {
+	// CORS headers for browser requests
+	const allowedOrigin = process.env.FRONTEND_URL || 'https://menix.vercel.app';
+	res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
+	res.setHeader('Vary', 'Origin');
+	res.setHeader('Access-Control-Allow-Credentials', 'true');
+	res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+	res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+	// Preflight
+	if (req.method === 'OPTIONS') {
+		return res.status(204).end();
+	}
+
+	const path = (req.url || '').split('?')[0] || '/';
+
+	// Lightweight health/status endpoints without DB
+	if (req.method === 'GET' && (path === '/' || path === '/api/index' || path === '/api/health')) {
+		return res.status(200).json({ status: 'OK', timestamp: new Date().toISOString(), environment: process.env.NODE_ENV || 'development' });
+	}
+
 	try {
 		await connectDB();
 
