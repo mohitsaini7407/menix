@@ -76,9 +76,5 @@ app.post('/api/users', async (req, res) => {
   }
 });
 
-// ❌ REMOVE app.listen
-// app.listen(PORT, () => console.log(`Server running on ${PORT}`));
-
-// ✅ Instead: export the Express app for Vercel
-export default app;
-
+// Export the Express app for Vercel
+export default app; 
