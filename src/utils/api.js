@@ -61,18 +61,6 @@ class ApiService {
     });
   }
 
-  // Wallet endpoints
-  async getWallet(userId) {
-    return this.request(`/api/wallet/${userId}`);
-  }
-
-  async updateWallet(userId, amount, operation) {
-    return this.request(`/api/wallet/${userId}`, {
-      method: 'PUT',
-      body: JSON.stringify({ amount, operation }),
-    });
-  }
-
   // Generic CRUD methods
   async get(endpoint) {
     return this.request(endpoint);

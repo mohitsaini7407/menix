@@ -34,7 +34,7 @@ module.exports = async (req, res) => {
 	res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
 	res.setHeader('Vary', 'Origin');
 	res.setHeader('Access-Control-Allow-Credentials', 'true');
-	res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,OPTIONS');
+	res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
 	res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
 	// Preflight
@@ -53,35 +53,6 @@ module.exports = async (req, res) => {
 		await connectDB();
 
 		if (req.method === 'GET') {
-			await connectDB();
-			
-			// Check if it's a specific user wallet request
-			if (path.startsWith('/api/wallet/')) {
-				const userId = path.split('/').pop();
-				console.log('Fetching wallet for user:', userId);
-				
-				try {
-					const user = await User.findById(userId).select('username email wallet');
-					if (user) {
-						return res.status(200).json({ 
-							success: true, 
-							user: {
-								id: user._id,
-								username: user.username,
-								email: user.email,
-								wallet: user.wallet || 0
-							}
-						});
-					} else {
-						return res.status(404).json({ success: false, error: 'User not found' });
-					}
-				} catch (error) {
-					console.error('Error fetching user wallet:', error);
-					return res.status(500).json({ success: false, error: 'Failed to fetch wallet data' });
-				}
-			}
-			
-			// Default users endpoint
 			const users = await User.find({}, 'email password');
 			return res.status(200).json({ success: true, users });
 		}
@@ -141,57 +112,6 @@ module.exports = async (req, res) => {
 					wallet: newUser.wallet
 				}
 			});
-		}
-
-		if (req.method === 'PUT') {
-			await connectDB();
-			
-			// Check if it's a wallet update request
-			if (path.startsWith('/api/wallet/')) {
-				const userId = path.split('/').pop();
-				const { amount, operation } = req.body; // operation: 'add' or 'subtract'
-				
-				console.log('Updating wallet for user:', userId, 'amount:', amount, 'operation:', operation);
-				
-				if (!amount || !operation || !['add', 'subtract'].includes(operation)) {
-					return res.status(400).json({ success: false, error: 'Invalid amount or operation' });
-				}
-				
-				try {
-					const user = await User.findById(userId);
-					if (!user) {
-						return res.status(404).json({ success: false, error: 'User not found' });
-					}
-					
-					// Update wallet balance
-					if (operation === 'add') {
-						user.wallet = (user.wallet || 0) + amount;
-					} else {
-						if ((user.wallet || 0) < amount) {
-							return res.status(400).json({ success: false, error: 'Insufficient balance' });
-						}
-						user.wallet = (user.wallet || 0) - amount;
-					}
-					
-					await user.save();
-					console.log('Wallet updated for user:', userId, 'new balance:', user.wallet);
-					
-					return res.status(200).json({ 
-						success: true, 
-						user: {
-							id: user._id,
-							username: user.username,
-							email: user.email,
-							wallet: user.wallet
-						}
-					});
-				} catch (error) {
-					console.error('Error updating user wallet:', error);
-					return res.status(500).json({ success: false, error: 'Failed to update wallet' });
-				}
-			}
-			
-			return res.status(405).json({ success: false, error: 'Method Not Allowed' });
 		}
 
 		return res.status(405).json({ success: false, error: 'Method Not Allowed' });

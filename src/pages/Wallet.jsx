@@ -2,173 +2,123 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import walletLogo from '../assets/wallet.png';
+import bgmiBg from '../assets/bgmi-bg.jpg';
 import { useAuth } from '../contexts/AuthContext';
-import { getWallet } from '../utils/api';
 
 const Wallet = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [walletData, setWalletData] = useState(null);
+  const [wallet, setWallet] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchWalletData = async () => {
-      if (!user || !user.id) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const data = await getWallet(user.id);
-        if (data.success) {
-          setWalletData(data.user);
-        } else {
-          setError(data.error || 'Failed to fetch wallet data');
-        }
-      } catch (err) {
-        console.error('Error fetching wallet:', err);
-        setError('Network error. Please try again.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchWalletData();
+    if (user && user.id) {
+      fetch(`http://localhost:3002/users`)
+        .then(res => res.json())
+        .then(users => {
+          const u = users.find(u => u.id === user.id);
+          setWallet(u ? u.wallet : 0);
+          setLoading(false);
+        })
+        .catch(() => {
+          setWallet(0);
+          setLoading(false);
+        });
+    } else {
+      setLoading(false);
+    }
   }, [user]);
-
-  if (!user) {
-    return (
-      <>
-        <Header title="Wallet" />
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
-          <div className="text-center">
-            <div className="text-white text-xl mb-4">Please login to view your wallet</div>
-            <button
-              onClick={() => navigate('/login')}
-              className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
-            >
-              Go to Login
-            </button>
-          </div>
-        </div>
-      </>
-    );
-  }
 
   return (
     <>
       <Header title="Wallet" />
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-8 px-4">
-        <div className="max-w-4xl mx-auto">
-          {/* Main Wallet Card */}
-          <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 p-8 mb-8">
-            <div className="flex items-center justify-center mb-8">
-              <div className="bg-gradient-to-br from-red-500 to-red-600 p-4 rounded-full shadow-lg">
-                <img src={walletLogo} alt="Wallet" className="w-12 h-12 object-contain" />
-              </div>
-            </div>
+      <div 
+        className="min-h-screen relative overflow-hidden"
+        style={{
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.8)), url(${bgmiBg})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed'
+        }}
+      >
+        {/* Animated background overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-red-900/20 via-purple-900/20 to-blue-900/20 animate-pulse"></div>
+        
+        {/* Floating particles effect */}
+        <div className="absolute inset-0 overflow-hidden">
+          {[...Array(20)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-2 h-2 bg-red-500/30 rounded-full animate-bounce"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 2}s`,
+                animationDuration: `${2 + Math.random() * 3}s`
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Main content */}
+        <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4">
+          {/* Wallet Card */}
+          <div className="bg-gradient-to-br from-white/20 to-white/10 backdrop-blur-lg rounded-3xl shadow-2xl p-8 border border-white/30 max-w-md w-full relative overflow-hidden">
+            {/* Card background pattern */}
+            <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 to-purple-500/10 rounded-3xl"></div>
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-red-500/20 to-transparent rounded-full -translate-y-16 translate-x-16"></div>
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-blue-500/20 to-transparent rounded-full translate-y-12 -translate-x-12"></div>
             
-            <h1 className="text-4xl font-bold text-center text-white mb-2" style={{ fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif" }}>
-              My Wallet
-            </h1>
-            <p className="text-gray-300 text-center mb-8">Manage your tournament funds</p>
-
-            {/* Balance Display */}
-            <div className="text-center mb-8">
-              <div className="text-7xl font-black text-white mb-2">
-                {loading ? (
-                  <div className="animate-pulse">...</div>
-                ) : error ? (
-                  <div className="text-red-400 text-4xl">Error</div>
-                ) : (
-                  `₹${walletData?.wallet || 0}`
-                )}
+            {/* Content */}
+            <div className="relative z-10 text-center">
+              {/* Wallet Icon */}
+              <div className="relative mb-6">
+                <div className="w-24 h-24 mx-auto bg-gradient-to-br from-red-500 to-purple-600 rounded-full flex items-center justify-center shadow-2xl border-4 border-white/30">
+                  <img src={walletLogo} alt="Wallet" className="w-12 h-12 object-contain filter brightness-0 invert" />
+                </div>
+                {/* Glow effect */}
+                <div className="absolute inset-0 w-24 h-24 mx-auto bg-gradient-to-br from-red-500 to-purple-600 rounded-full blur-xl opacity-50 animate-pulse"></div>
               </div>
-              <div className="text-xl text-gray-300">Available Balance</div>
-            </div>
 
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button
-                onClick={() => navigate('/pay')}
-                className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold text-lg py-4 px-8 rounded-2xl shadow-lg border-2 border-red-500 uppercase tracking-wide transition-all duration-200 transform hover:scale-105 hover:shadow-xl"
+              {/* Title */}
+              <h1 
+                className="text-4xl font-black text-white mb-6 tracking-wider"
                 style={{ fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif" }}
+              >
+                WALLET
+              </h1>
+
+              {/* Balance Display */}
+              <div className="mb-8">
+                <div className="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-yellow-400 to-green-400 mb-2">
+                  {loading ? '...' : `₹${wallet}`}
+                </div>
+                <div className="text-xl text-gray-300 font-medium">Current Balance</div>
+              </div>
+
+              {/* Add Money Button */}
+              <button
+                className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-black text-xl py-4 rounded-2xl shadow-2xl border-2 border-red-500/50 uppercase tracking-widest transition-all duration-300 transform hover:scale-105 hover:shadow-red-500/25 active:scale-95"
+                style={{ fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif" }}
+                onClick={() => navigate('/pay')}
               >
                 💰 Add Money
               </button>
-              
-              <button
-                onClick={() => navigate('/tournaments')}
-                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold text-lg py-4 px-8 rounded-2xl shadow-lg border-2 border-blue-500 uppercase tracking-wide transition-all duration-200 transform hover:scale-105 hover:shadow-xl"
-                style={{ fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif" }}
-              >
-                🏆 Join Tournament
-              </button>
-            </div>
-          </div>
 
-          {/* User Info Card */}
-          <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6">
-            <h2 className="text-2xl font-bold text-white mb-4 text-center" style={{ fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif" }}>
-              Account Information
-            </h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                <div className="text-gray-400 text-sm mb-2">Username</div>
-                <div className="text-white font-semibold text-lg">
-                  {walletData?.username || user.username || 'N/A'}
-                </div>
-              </div>
-              
-              <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                <div className="text-gray-400 text-sm mb-2">Email</div>
-                <div className="text-white font-semibold text-lg">
-                  {walletData?.email || user.email || 'N/A'}
+              {/* Additional Info */}
+              <div className="mt-6 text-center">
+                <div className="text-sm text-gray-400">
+                  Secure • Fast • Reliable
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Error Display */}
-          {error && (
-            <div className="mt-6 bg-red-500/20 border border-red-500/50 rounded-xl p-4">
-              <div className="text-red-400 text-center">
-                <div className="font-semibold mb-2">⚠️ Error Loading Wallet</div>
-                <div>{error}</div>
-                <button
-                  onClick={() => window.location.reload()}
-                  className="mt-3 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm transition-colors"
-                >
-                  Retry
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Quick Stats */}
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-gradient-to-br from-green-500/20 to-green-600/20 backdrop-blur-sm rounded-2xl border border-green-500/30 p-6 text-center">
-              <div className="text-3xl mb-2">🏆</div>
-              <div className="text-green-400 font-semibold text-lg">Tournaments</div>
-              <div className="text-white text-2xl font-bold">0</div>
-            </div>
-            
-            <div className="bg-gradient-to-br from-blue-500/20 to-blue-600/20 backdrop-blur-sm rounded-2xl border border-blue-500/30 p-6 text-center">
-              <div className="text-3xl mb-2">🎯</div>
-              <div className="text-blue-400 font-semibold text-lg">Wins</div>
-              <div className="text-white text-2xl font-bold">0</div>
-            </div>
-            
-            <div className="bg-gradient-to-br from-purple-500/20 to-purple-600/20 backdrop-blur-sm rounded-2xl border border-purple-500/30 p-6 text-center">
-              <div className="text-3xl mb-2">⭐</div>
-              <div className="text-purple-400 font-semibold text-lg">Rank</div>
-              <div className="text-white text-2xl font-bold">#1</div>
-            </div>
+          {/* Bottom decorative elements */}
+          <div className="mt-8 flex space-x-4">
+            <div className="w-3 h-3 bg-red-500 rounded-full animate-ping"></div>
+            <div className="w-3 h-3 bg-purple-500 rounded-full animate-ping" style={{ animationDelay: '0.5s' }}></div>
+            <div className="w-3 h-3 bg-blue-500 rounded-full animate-ping" style={{ animationDelay: '1s' }}></div>
           </div>
         </div>
       </div>
