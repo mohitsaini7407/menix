@@ -36,13 +36,14 @@ class AuthService {
         const data = await response.json();
         if (data.success) {
           console.log('Login successful:', data);
+          const u = data.user || {};
           return {
             success: true,
-            user: data.user || {
-              id: data.userId,
-              username: id.includes('@') ? id.split('@')[0] : id,
-              email: id.includes('@') ? id : undefined,
-              wallet: data.user?.wallet || 0
+            user: {
+              id: u.id || u._id || data.userId,
+              username: u.username || (id.includes('@') ? id.split('@')[0] : id),
+              email: u.email || (id.includes('@') ? id : undefined),
+              wallet: typeof u.wallet === 'number' ? u.wallet : 0
             }
           };
         } else {
@@ -71,13 +72,14 @@ class AuthService {
       if (fallbackResponse.ok) {
         const fallbackData = await fallbackResponse.json();
         console.log('Fallback login successful:', fallbackData);
+        const u = fallbackData.user || fallbackData;
         return {
           success: true,
           user: {
-            id: fallbackData.userId || fallbackData.id,
-            username: id.includes('@') ? id.split('@')[0] : id,
-            email: id.includes('@') ? id : undefined,
-            wallet: 0
+            id: u.id || u._id || fallbackData.userId,
+            username: u.username || (id.includes('@') ? id.split('@')[0] : id),
+            email: u.email || (id.includes('@') ? id : undefined),
+            wallet: typeof u.wallet === 'number' ? u.wallet : 0
           }
         };
       }
