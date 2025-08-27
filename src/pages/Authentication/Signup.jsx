@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import apiService from '../../utils/api';
 import { useAuth } from "../../contexts/AuthContext";
 import { useNavigate } from 'react-router-dom';
 
@@ -52,12 +53,7 @@ const Signup = () => {
     const generatedOtp = generateOTP();
     setOtp(generatedOtp);
     try {
-      const response = await fetch('http://localhost:3002/send-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ identifier: id, otp: generatedOtp })
-      });
-      const data = await response.json();
+      const data = await apiService.post('/send-otp', { identifier: id, otp: generatedOtp });
       if (!data.success) {
         throw new Error(data.error || 'Failed to send OTP');
       }
@@ -81,12 +77,7 @@ const Signup = () => {
     }
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:3002/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ identifier: id, password })
-      });
-      const data = await res.json();
+      const data = await apiService.post('/signup', { identifier: id, password });
       if (!data.success) throw new Error(data.error || 'Failed to save user');
       setSuccess('Signup successful! Redirecting...');
       login(data.user);

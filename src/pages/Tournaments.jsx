@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { tournamentDetails } from './tournaments';
+
 import Header from '../components/Header';
 import CountdownTimer from '../components/CountdownTimer';
 import { useAuth } from '../contexts/AuthContext';
+import { useTournament } from '../contexts/TournamentContext';
 
 // Add Google Fonts link for Montserrat in index.html (manual step if not already done)
 // <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
@@ -17,11 +18,10 @@ const FILTERS = [
 
 const Tournaments = () => {
   const [selectedFilter, setSelectedFilter] = useState(null);
-  const [tournaments, setTournaments] = useState([]);
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { tournaments, loading } = useTournament();
   const [registeredTournaments, setRegisteredTournaments] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) {
@@ -29,26 +29,12 @@ const Tournaments = () => {
       return;
     }
     
-    // Initialize tournaments data
-    if (tournamentDetails && Array.isArray(tournamentDetails)) {
-      setTournaments(tournamentDetails);
-    } else {
-      setTournaments([]);
-    }
-    
-    if (user && user.id) {
-      fetch(`http://localhost:3002/registrations?userId=${user.id}`)
-        .then(res => res.json())
-        .then(data => setRegisteredTournaments(data.map(r => r.tournamentId)))
-        .catch(() => setRegisteredTournaments([]))
-        .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
-    }
+    // For now, we'll use empty registered tournaments since we haven't implemented registration tracking yet
+    setRegisteredTournaments([]);
   }, [user, navigate]);
 
   const handleRegisterClick = (tournament) => {
-      navigate(`/tournament/${tournament.id}`);
+      navigate(`/tournament/${tournament._id || tournament.id}`);
   };
 
   // Don't render until we have tournaments data
@@ -91,7 +77,7 @@ const Tournaments = () => {
           })
           .map(t => (
             <div
-              key={t.id}
+              key={t._id || t.id}
               className="relative max-w-2xl w-full bg-black rounded-2xl shadow-2xl border-2 border-red-600 p-4 sm:p-6 md:p-8 flex flex-col mb-6 transition-transform duration-200 hover:scale-105 hover:shadow-red-700/50"
               style={{ fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif", boxShadow: '0 8px 32px 0 rgba(0,0,0,0.75)' }}
             >

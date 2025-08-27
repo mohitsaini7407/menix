@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { TournamentProvider } from './contexts/TournamentContext';
+import ApiTest from './components/ApiTest';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Tournaments from './pages/Tournaments';
@@ -164,6 +165,7 @@ function AppWithBackButton() {
             <Route path="/profile-details" element={<ProfileDetails />} />
             <Route path="/wallet" element={<Wallet />} />
             <Route path="/pay" element={<Pay />} />
+            <Route path="/api-test" element={<ApiTest />} />
             <Route path="*" element={<div className="text-center text-white text-2xl mt-20" style={{ fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif" }}>404 - Page Not Found</div>} />
           </Routes>
         </TournamentProvider>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from "../../contexts/AuthContext";
 import { useNavigate, Link } from 'react-router-dom';
-import { authenticateUser } from "../users";
+import authService from '../../services/authService';
 
 const Login = () => {
   const [identifier, setIdentifier] = useState('');
@@ -10,12 +10,24 @@ const Login = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  const [serverStatus, setServerStatus] = useState('checking');
 
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  // Ensure component is ready to render
+  // Check server health on component mount
   useEffect(() => {
+    const checkServer = async () => {
+      try {
+        const isHealthy = await authService.checkServerHealth();
+        setServerStatus(isHealthy ? 'online' : 'offline');
+      } catch (error) {
+        console.error('Server health check failed:', error);
+        setServerStatus('offline');
+      }
+    };
+
+    checkServer();
     setIsReady(true);
   }, []);
 
@@ -33,64 +45,17 @@ const Login = () => {
     setLoading(true);
     setError('');
     
-    let id = identifier;
-    if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(id)) id = id.toLowerCase();
-
     try {
-      const API_BASE = import.meta.env.VITE_API_URL || "https://menix-backend.vercel.app";
+      const result = await authService.login(identifier, password);
       
-      const response = await fetch(`${API_BASE}/api/index`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ identifier: id, password }),
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success) {
-          // Normalize backend response to a user object for storage
-          const normalizedUser = data.user || {
-            id: data.userId,
-            username: id.includes('@') ? id.split('@')[0] : id,
-            email: id.includes('@') ? id : undefined,
-          };
-          login(normalizedUser);
-          setLoading(false);
-          navigate('/');
-          return;
-        } else {
-          setError(data.error || 'Invalid email/phone or password.');
-          setLoading(false);
-          return;
-        }
+      if (result.success) {
+        login(result.user);
+        setLoading(false);
+        navigate('/');
+      } else {
+        setError(result.error);
+        setLoading(false);
       }
-      
-      // If production backend fails, try MongoDB Atlas
-      const mongoResponse = await fetch('https://menix-backend.vercel.app/api/index', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ identifier: id, password })
-      });
-
-      
-      if (mongoResponse.ok) {
-        const mongoData = await mongoResponse.json();
-        if (mongoData.success) {
-          const normalizedUser = mongoData.user || {
-            id: mongoData.userId,
-            username: id.includes('@') ? id.split('@')[0] : id,
-            email: id.includes('@') ? id : undefined,
-          };
-          login(normalizedUser);
-          setLoading(false);
-          navigate('/');
-          return;
-        }
-      }
-      
-      setError('Invalid email/phone or password.');
-      setLoading(false);
-      
     } catch (err) {
       console.error('Login error:', err);
       setError('Login failed. Please try again.');
@@ -101,6 +66,20 @@ const Login = () => {
   return (
     <div className="page-container" style={{ fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif" }}>
       <h1 className="section-title" style={{ fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif", fontWeight: '900' }}>Login</h1>
+      
+      {/* Server Status Indicator */}
+      {serverStatus === 'checking' && (
+        <div className="text-center mb-4 p-2 bg-blue-500 bg-opacity-20 rounded text-blue-300">
+          Checking server connection...
+        </div>
+      )}
+      
+      {serverStatus === 'offline' && (
+        <div className="text-center mb-4 p-2 bg-red-500 bg-opacity-20 rounded text-red-300">
+          ⚠️ Server connection issue. Please check your internet connection.
+        </div>
+      )}
+      
       <div className="card">
         <form onSubmit={handleSubmit}>
           <label style={{ fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif", marginBottom: '8px', display: 'block' }}>Mobile Number or Email</label>
@@ -147,7 +126,12 @@ const Login = () => {
             </button>
           </div>
           {error && <div className="text-center mb-4" style={{color:'#f87171', fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif"}}>{error}</div>}
-          <button type="submit" className="btn" style={{width:'100%', fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif", marginBottom: '16px'}} disabled={loading}>
+          <button 
+            type="submit" 
+            className="btn" 
+            style={{width:'100%', fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif", marginBottom: '16px'}} 
+            disabled={loading || serverStatus === 'offline'}
+          >
             {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>

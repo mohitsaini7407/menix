@@ -1,40 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { tournamentDetails } from './tournaments';
 import Header from '../components/Header';
 import { useAuth } from '../contexts/AuthContext';
+import { useTournament } from '../contexts/TournamentContext';
 
 const TournamentDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { getTournament } = useTournament();
   const [isRegistered, setIsRegistered] = useState(false);
   const [loading, setLoading] = useState(false);
   const [wallet, setWallet] = useState(null);
   const [notification, setNotification] = useState('');
   
-  // Find the specific tournament by ID
-  const tournament = tournamentDetails.find(t => t.id === parseInt(id));
+  // Find the specific tournament by ID from MongoDB
+  const tournament = getTournament(id);
 
   useEffect(() => {
     if (user && user.id) {
-      // Fetch user wallet balance
-      fetch(`http://localhost:3002/users`)
-        .then(res => res.json())
-        .then(users => {
-          const u = users.find(u => u.id === user.id);
-          setWallet(u ? u.wallet : 0);
-        })
-        .catch(() => setWallet(0));
+      // For now, use user's wallet from auth context
+      setWallet(user.wallet || 0);
       
       // Check if user is already registered for this tournament
-      fetch(`http://localhost:3002/registrations?userId=${user.id}`)
-        .then(res => res.json())
-        .then(registrations => {
-          const isAlreadyRegistered = registrations.some(reg => reg.tournamentId === parseInt(id));
-          setIsRegistered(isAlreadyRegistered);
-        })
-        .catch(() => setIsRegistered(false));
+      // This will be implemented when we add registration tracking
+      setIsRegistered(false);
     }
   }, [user, id]);
 
@@ -42,14 +32,15 @@ const TournamentDetail = () => {
     console.log('Register button clicked!');
     console.log('User:', user);
     console.log('Wallet:', wallet);
-    console.log('Tournament entry fee:', tournament.entryFee);
+    console.log('Tournament:', tournament);
+    console.log('Tournament entry fee:', tournament?.entryFee);
     
     if (!user || !user.id) {
       console.log('No user found, redirecting to login');
       navigate('/login');
       return;
     }
-    if (wallet === null || wallet < tournament.entryFee) {
+    if (wallet === null || wallet < (tournament?.entryFee || 0)) {
       console.log('Insufficient balance');
       setNotification('Insufficient balance!');
       setTimeout(() => setNotification(''), 2000);
@@ -58,31 +49,19 @@ const TournamentDetail = () => {
     console.log('Starting registration process...');
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:3002/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id, tournamentId: tournament.id, teamName: user.username })
-      });
-      const data = await res.json();
-      if (data.success) {
+      // For now, just simulate successful registration
+      // This will be implemented when we add the registration endpoint
+      setTimeout(() => {
         setIsRegistered(true);
-        setWallet(wallet - tournament.entryFee);
+        setWallet(wallet - (tournament?.entryFee || 0));
         setNotification('Registration successful!');
+        setLoading(false);
         setTimeout(() => setNotification(''), 2000);
-      } else {
-        if (data.error && data.error.toLowerCase().includes('insufficient')) {
-          setNotification('Insufficient balance!');
-          setTimeout(() => setNotification(''), 2000);
-        } else {
-          setNotification(data.error || 'Registration failed.');
-          setTimeout(() => setNotification(''), 2000);
-        }
-      }
+      }, 1000);
     } catch (err) {
       setNotification('Registration failed.');
-      setTimeout(() => setNotification(''), 2000);
-    } finally {
       setLoading(false);
+      setTimeout(() => setNotification(''), 2000);
     }
   };
 
@@ -96,7 +75,11 @@ const TournamentDetail = () => {
       )}
       <div className="page-container" style={{ fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif" }}>
         <div className="card">
-          {tournament ? (
+          {!tournament ? (
+            <div className="text-center text-white text-2xl mt-20">
+              Tournament not found
+            </div>
+          ) : (
             <>
               <h2 className="text-xl font-bold mb-4" style={{ fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif", fontWeight: '900' }}>BGMI {tournament.type} League</h2>
               
@@ -143,8 +126,6 @@ const TournamentDetail = () => {
                 </>
               )}
             </>
-          ) : (
-            <p style={{ fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif" }}>Tournament not found.</p>
           )}
         </div>
 

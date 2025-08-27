@@ -4,6 +4,7 @@ import Header from '../components/Header';
 import walletLogo from '../assets/wallet.png';
 import bgmiBg from '../assets/bgmi-bg.jpg';
 import { useAuth } from '../contexts/AuthContext';
+import apiService from '../utils/api';
 
 const Wallet = () => {
   const navigate = useNavigate();
@@ -12,21 +13,40 @@ const Wallet = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (user && user.id) {
-      fetch(`http://localhost:3002/users`)
-        .then(res => res.json())
-        .then(users => {
-          const u = users.find(u => u.id === user.id);
-          setWallet(u ? u.wallet : 0);
+    async function loadWallet() {
+      try {
+        if (!user) {
           setLoading(false);
-        })
-        .catch(() => {
+          return;
+        }
+
+        // Use wallet from auth if present
+        if (typeof user.wallet === 'number') {
+          setWallet(user.wallet);
+        }
+
+        // Attempt to fetch fresh value from API
+        const users = await apiService.getUsers();
+        // Match by _id or email
+        const matched = Array.isArray(users)
+          ? users.find((u) => u._id === user.id || u.email === user.email)
+          : null;
+        if (matched && typeof matched.wallet === 'number') {
+          setWallet(matched.wallet);
+        } else if (typeof user.wallet === 'number') {
+          setWallet(user.wallet);
+        } else {
           setWallet(0);
-          setLoading(false);
-        });
-    } else {
-      setLoading(false);
+        }
+      } catch (err) {
+        // Fallback to user wallet or 0
+        setWallet(typeof user?.wallet === 'number' ? user.wallet : 0);
+      } finally {
+        setLoading(false);
+      }
     }
+
+    loadWallet();
   }, [user]);
 
   return (

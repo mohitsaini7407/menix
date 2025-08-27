@@ -1,8 +1,10 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://menix-backend.vercel.app';
+const PRIMARY_API_BASE_URL = import.meta.env.VITE_API_URL || 'https://menix-backend.vercel.app';
+const FALLBACK_API_BASE_URL = 'https://menix-backtest.vercel.app';
 
 class ApiService {
   constructor() {
-    this.baseURL = API_BASE_URL;
+    this.baseURL = PRIMARY_API_BASE_URL;
+    this.fallbackBaseURL = FALLBACK_API_BASE_URL;
   }
 
   async request(endpoint, options = {}) {
@@ -27,20 +29,32 @@ class ApiService {
 
     try {
       const response = await fetch(url, config);
-      
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
       const contentType = response.headers.get('content-type');
       if (contentType && contentType.includes('application/json')) {
         return await response.json();
       }
-      
       return await response.text();
     } catch (error) {
-      console.error('API request failed:', error);
-      throw error;
+      // Try fallback base URL on network/CORS errors
+      try {
+        const fallbackUrl = `${this.fallbackBaseURL}${endpoint}`;
+        const response = await fetch(fallbackUrl, config);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          return await response.json();
+        }
+        return await response.text();
+      } catch (fallbackError) {
+        console.error('API request failed:', error);
+        console.error('Fallback API request failed:', fallbackError);
+        throw fallbackError;
+      }
     }
   }
 

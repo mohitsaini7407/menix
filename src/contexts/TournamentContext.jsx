@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import apiService from '../utils/api';
 
 const TournamentContext = createContext();
 
@@ -15,22 +16,17 @@ export const TournamentProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [liveMatches, setLiveMatches] = useState([]);
 
-  // Production backend URL
-  const API_BASE_URL = 'https://menix-backtest.vercel.app';
+  // Use shared API service for requests
 
   // Fetch tournaments from API
   const fetchTournaments = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/tournaments`);
-      if (response.ok) {
-        const data = await response.json();
-        if (Array.isArray(data)) {
-          setTournaments(data);
-        } else {
-          console.error('Tournaments data is not an array:', data);
-          setTournaments([]);
-        }
+      console.log('Fetching tournaments from API service');
+      const data = await apiService.get('/api/tournaments');
+      if (Array.isArray(data)) {
+        setTournaments(data);
       } else {
+        console.error('Tournaments data is not an array:', data);
         setTournaments([]);
       }
     } catch (error) {
@@ -44,24 +40,13 @@ export const TournamentProvider = ({ children }) => {
   // Create new tournament (admin only)
   const createTournament = async (tournamentData) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/tournaments`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(tournamentData),
-      });
-
-      if (response.ok) {
-        const newTournament = await response.json();
+      const newTournament = await apiService.post('/api/tournaments', tournamentData);
         setTournaments(prev => {
           if (!Array.isArray(prev)) return [newTournament];
           return [...prev, newTournament];
         });
         return { success: true, tournament: newTournament };
-      } else {
-        throw new Error('Failed to create tournament');
-      }
+      
     } catch (error) {
       console.error('Error creating tournament:', error);
       return { success: false, error: error.message };
@@ -71,30 +56,19 @@ export const TournamentProvider = ({ children }) => {
   // Register team for tournament
   const registerTeam = async (tournamentId, teamData) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/tournaments/${tournamentId}/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(teamData),
-      });
-
-      if (response.ok) {
-        const result = await response.json();
+      const result = await apiService.post(`/api/tournaments/${tournamentId}/register`, teamData);
         // Update tournament with new registration
         setTournaments(prev => {
           if (!Array.isArray(prev)) return prev;
           
           return prev.map(t => 
-            t.id === tournamentId 
+            (t._id || t.id) === tournamentId 
               ? { ...t, registeredTeams: [...(t.registeredTeams || []), result.team] }
               : t
           );
         });
         return { success: true, registration: result };
-      } else {
-        throw new Error('Registration failed');
-      }
+      
     } catch (error) {
       console.error('Error registering team:', error);
       return { success: false, error: error.message };
@@ -104,7 +78,7 @@ export const TournamentProvider = ({ children }) => {
   // Get tournament by ID
   const getTournament = (id) => {
     if (!Array.isArray(tournaments)) return null;
-    return tournaments.find(t => t.id === parseInt(id));
+    return tournaments.find(t => (t._id || t.id) === id || (t._id || t.id) === parseInt(id));
   };
 
   // Update tournament status based on time
