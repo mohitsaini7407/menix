@@ -49,6 +49,39 @@ const Wallet = () => {
     loadWallet();
   }, [user]);
 
+  // Auto-refresh wallet on window focus and at intervals
+  useEffect(() => {
+    let intervalId;
+    let isUnmounted = false;
+
+    async function refreshOnDemand() {
+      if (!user || isUnmounted) return;
+      try {
+        const users = await apiService.getUsers();
+        const matched = Array.isArray(users)
+          ? users.find((u) => u._id === user.id || u.email === user.email)
+          : null;
+        if (matched && typeof matched.wallet === 'number') {
+          setWallet(matched.wallet);
+        }
+      } catch (_) {
+        // ignore transient errors
+      }
+    }
+
+    const handleFocus = () => refreshOnDemand();
+    window.addEventListener('focus', handleFocus);
+
+    // Poll every 15s
+    intervalId = setInterval(refreshOnDemand, 15000);
+
+    return () => {
+      isUnmounted = true;
+      window.removeEventListener('focus', handleFocus);
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [user]);
+
   return (
     <>
       <Header title="Wallet" />
