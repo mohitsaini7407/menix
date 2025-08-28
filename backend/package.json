@@ -15,7 +15,8 @@
     "dotenv": "^17.2.1",
     "helmet": "^8.0.0",
     "morgan": "^1.10.0",
-    "compression": "^1.7.4"
+    "compression": "^1.7.4",
+    "razorpay": "^2.9.5"
   },
   "devDependencies": {
     "nodemon": "^3.0.0"

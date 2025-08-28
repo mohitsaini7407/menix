@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const Razorpay = require('razorpay');
+const crypto = require('crypto');
 require('dotenv').config();
 
 const app = express();
@@ -63,6 +65,12 @@ const tournamentSchema = new mongoose.Schema({
 const User = mongoose.models.User || mongoose.model('User', userSchema);
 const Tournament = mongoose.models.Tournament || mongoose.model('Tournament', tournamentSchema);
 
+// Razorpay client
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID || '',
+  key_secret: process.env.RAZORPAY_KEY_SECRET || ''
+});
+
 // Routes
 app.get('/', (req, res) => {
   res.json({ 
@@ -79,6 +87,65 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString(), 
     environment: process.env.NODE_ENV || 'development'
   });
+});
+
+// Razorpay routes
+app.get('/api/razorpay/key', (req, res) => {
+  if (!process.env.RAZORPAY_KEY_ID) {
+    return res.status(500).json({ success: false, error: 'Razorpay not configured' });
+  }
+  res.json({ success: true, key: process.env.RAZORPAY_KEY_ID });
+});
+
+app.post('/api/razorpay/order', async (req, res) => {
+  try {
+    const { amount, currency = 'INR', receipt } = req.body || {};
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ success: false, error: 'Invalid amount' });
+    }
+    const options = {
+      amount: Math.round(Number(amount) * 100),
+      currency,
+      receipt: receipt || `rcpt_${Date.now()}`,
+    };
+    const order = await razorpay.orders.create(options);
+    return res.status(201).json({ success: true, order });
+  } catch (error) {
+    console.error('Razorpay order error:', error);
+    return res.status(500).json({ success: false, error: 'Failed to create order' });
+  }
+});
+
+app.post('/api/razorpay/verify', async (req, res) => {
+  try {
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, userId, amount } = req.body || {};
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+      return res.status(400).json({ success: false, error: 'Missing payment params' });
+    }
+    const generatedSignature = crypto
+      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET || '')
+      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+      .digest('hex');
+    const isValid = generatedSignature === razorpay_signature;
+    if (!isValid) {
+      return res.status(400).json({ success: false, error: 'Invalid signature' });
+    }
+
+    // If valid, optionally credit wallet
+    if (userId && typeof amount === 'number') {
+      try {
+        await connectDB();
+        await User.updateOne({ _id: userId }, { $inc: { wallet: Math.round(Number(amount)) } });
+      } catch (e) {
+        console.error('Wallet credit error:', e);
+      }
+    }
+
+    return res.json({ success: true });
+  } catch (error) {
+    console.error('Razorpay verify error:', error);
+    return res.status(500).json({ success: false, error: 'Verification failed' });
+  }
 });
 
 // Tournaments endpoints
