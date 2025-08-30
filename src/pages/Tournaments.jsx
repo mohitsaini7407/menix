@@ -134,10 +134,10 @@ const Tournaments = () => {
                   />
                 ))}
               </div>
-              {/* Slots badge and progress line below */}
+              {/* Registered slots only */}
               <div className="flex flex-nowrap justify-between items-center w-full mb-2">
                 <div className="px-4 py-1 rounded-full font-bold text-xs sm:text-sm bg-gray-900 text-red-400 border border-red-600 tracking-wide" style={{ fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif" }}>
-                  Slots: {t.joined} / {t.totalSlots}
+                  Registered: {t.joined}
                 </div>
               </div>
               {/* Button */}

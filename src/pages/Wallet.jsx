@@ -103,7 +103,7 @@ const Wallet = () => {
           padding: 10,
           maxWidth: 420,
           width: '70vw',
-          margin: '5px 0 10px 0',
+          margin: '15px 0 10px 0',
           textAlign: 'center',
           border: '1px solid rgba(220,38,38,0.3)',
         }}>
