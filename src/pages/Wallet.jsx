@@ -98,12 +98,12 @@ const Wallet = () => {
       >
         <div style={{
           background: 'linear-gradient(135deg, rgba(220,38,38,0.8) 0%, rgba(0,0,0,0.9) 100%)',
-          borderRadius: 16,
+          borderRadius: 25,
           boxShadow: '0 8px 32px rgba(220,38,38,0.3), 0 4px 16px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)',
-          padding: 32,
+          padding: 10,
           maxWidth: 420,
           width: '70vw',
-          margin: '10px 0 24px 0',
+          margin: '10px 0 10px 0',
           textAlign: 'center',
           border: '1px solid rgba(220,38,38,0.3)',
         }}>
@@ -145,7 +145,7 @@ const Wallet = () => {
             <button
               style={{
                 flex: 1,
-                background: '#f87171',
+                background: 'rgb(207, 0, 0)',
                 color: '#ffffff',
                 border: 'none',
                 borderRadius: 12,
@@ -172,7 +172,7 @@ const Wallet = () => {
             <button
               style={{
                 flex: 1,
-                background: 'rgba(239,68,68,0.2)',
+                background: 'rgba(255, 0, 0, 0.2)',
                 color: '#f87171',
                 border: '1px solid rgba(239,68,68,0.5)',
                 borderRadius: 12,
