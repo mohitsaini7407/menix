@@ -136,7 +136,7 @@ const Wallet = () => {
               color: '#ffffff',
               fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif"
             }}>
-              {loading ? '...' : `₹${wallet}`}
+              {loading ? '...' : `₹ ${wallet}`}
             </div>
           </div>
 
@@ -145,7 +145,7 @@ const Wallet = () => {
             <button
               style={{
                 flex: 1,
-                background: '#f87171',
+                background: 'rgb(255, 0, 0)',
                 color: '#ffffff',
                 border: 'none',
                 borderRadius: 12,
