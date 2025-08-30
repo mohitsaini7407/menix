@@ -97,14 +97,15 @@ const Wallet = () => {
         }}
       >
         <div style={{
-          background: 'rgba(24,24,27,0.85)',
+          background: 'linear-gradient(135deg, rgba(220,38,38,0.8) 0%, rgba(0,0,0,0.9) 100%)',
           borderRadius: 16,
-          boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
+          boxShadow: '0 8px 32px rgba(220,38,38,0.3), 0 4px 16px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)',
           padding: 32,
           maxWidth: 420,
           width: '90vw',
-          margin: '1px 0 24px 0',
+          margin: '10px 0 24px 0',
           textAlign: 'center',
+          border: '1px solid rgba(220,38,38,0.3)',
         }}>
           {/* Wallet Title */}
           <h1 style={{ 
