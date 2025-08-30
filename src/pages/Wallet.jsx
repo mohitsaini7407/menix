@@ -100,7 +100,7 @@ const Wallet = () => {
           background: 'linear-gradient(135deg, rgba(220,38,38,0.8) 0%, rgba(0,0,0,0.9) 100%)',
           borderRadius: 25,
           boxShadow: '0 8px 32px rgba(220,38,38,0.3), 0 4px 16px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)',
-          padding: 10,
+          padding: 50,
           maxWidth: 420,
           width: '70vw',
           margin: '15px 0 10px 0',
