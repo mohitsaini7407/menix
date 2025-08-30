@@ -116,7 +116,7 @@ const Wallet = () => {
             letterSpacing: 1, 
             fontFamily: "'Montserrat', 'Poppins', Arial, sans-serif" 
           }}>
-            WALLET
+            WALLET 💰
           </h1>
 
           {/* Balance Display */}
